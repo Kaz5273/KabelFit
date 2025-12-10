@@ -1,6 +1,5 @@
 // Export all stores from here
+export { useExerciseStore } from './useExerciseStore';
+export { useSessionStore } from './useSessionStore';
 export { useUserStore } from './useUserStore';
 
-// Ajoute tes futurs stores ici :
-// export { useWorkoutStore } from './useWorkoutStore';
-// export { useExerciseStore } from './useExerciseStore';
