@@ -1,46 +1,44 @@
-import React, { useState } from 'react';
+import { ProgramCard } from '@/components/program';
+import { Colors } from '@/constants/theme';
+import { deleteProgram, getAllPrograms } from '@/database';
+import type { Program } from '@/database/types';
+import { Ionicons } from '@expo/vector-icons';
+import { useFocusEffect } from '@react-navigation/native';
+import { router } from 'expo-router';
+import React, { useCallback, useState } from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
-  StatusBar,
   Alert,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
-import { Colors } from '@/constants/theme';
-import { router } from 'expo-router';
-import { ProgramCard, Program } from '@/components/program';
-
-// Données de test - à remplacer par les vraies données de la DB
-const mockPrograms: Program[] = [
-  {
-    id: '1',
-    name: 'Programme Force',
-    sessionsCount: 12,
-    completedSessions: 8,
-    description: 'Programme de développement de la force',
-  },
-  {
-    id: '2',
-    name: 'Hypertrophie',
-    sessionsCount: 16,
-    completedSessions: 4,
-    description: 'Programme de prise de masse',
-  },
-  {
-    id: '3',
-    name: 'Full Body Débutant',
-    sessionsCount: 8,
-    completedSessions: 8,
-    description: 'Programme complet pour débutants',
-  },
-];
 
 export default function ProgramsScreen() {
-  const [programs, setPrograms] = useState<Program[]>(mockPrograms);
+  const [programs, setPrograms] = useState<Program[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const loadPrograms = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      const allPrograms = await getAllPrograms();
+      setPrograms(allPrograms);
+    } catch (error) {
+      console.error('Erreur lors du chargement des programmes:', error);
+      Alert.alert('Erreur', 'Impossible de charger les programmes');
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      loadPrograms();
+    }, [loadPrograms])
+  );
 
   const handleBack = () => {
     router.back();
@@ -53,22 +51,28 @@ export default function ProgramsScreen() {
   };
 
   const handleOpenProgram = (program: Program) => {
-    // Navigation vers le détail du programme
-    // router.push(`/program/${program.id}`);
-    console.log('Open program:', program.name);
+    // Navigation vers le détail du programme avec ses séances
+    router.push(`/program/${program.id}` as any);
   };
 
   const handleDeleteProgram = (program: Program) => {
     Alert.alert(
       'Supprimer le programme',
-      `Voulez-vous vraiment supprimer "${program.name}" ?`,
+      `Voulez-vous vraiment supprimer "${program.name}" et toutes ses séances ?`,
       [
         { text: 'Annuler', style: 'cancel' },
         {
           text: 'Supprimer',
           style: 'destructive',
-          onPress: () => {
-            setPrograms((prev) => prev.filter((p) => p.id !== program.id));
+          onPress: async () => {
+            try {
+              await deleteProgram(program.id!);
+              await loadPrograms();
+              Alert.alert('Succès', 'Programme supprimé');
+            } catch (error) {
+              console.error('Erreur lors de la suppression:', error);
+              Alert.alert('Erreur', 'Impossible de supprimer le programme');
+            }
           },
         },
       ]
