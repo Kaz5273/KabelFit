@@ -2,60 +2,69 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '@/constants/theme';
-
-export interface Program {
-  id: string;
-  name: string;
-  sessionsCount: number;
-  completedSessions: number;
-  description?: string;
-}
+import type { Program } from '@/database';
 
 interface ProgramCardProps {
   program: Program;
+  sessionsCount: number;
+  isActive: boolean;
   onPress: (program: Program) => void;
   onDelete?: (program: Program) => void;
 }
 
-export const ProgramCard: React.FC<ProgramCardProps> = ({ program, onPress, onDelete }) => {
-  const progress = program.sessionsCount > 0
-    ? Math.round((program.completedSessions / program.sessionsCount) * 100)
-    : 0;
-
+export const ProgramCard: React.FC<ProgramCardProps> = ({
+  program,
+  sessionsCount,
+  isActive,
+  onPress,
+  onDelete,
+}) => {
   return (
     <TouchableOpacity
-      style={styles.container}
+      style={[styles.container, !isActive && styles.containerInactive]}
       activeOpacity={0.7}
       onPress={() => onPress(program)}>
       <View style={styles.content}>
-        <View style={styles.iconContainer}>
-          <Ionicons name="barbell" size={24} color={Colors.dark.primary} />
+        <View style={[styles.iconContainer, !isActive && styles.iconContainerInactive]}>
+          <Ionicons
+            name="barbell"
+            size={24}
+            color={isActive ? Colors.dark.primary : Colors.dark.textMuted}
+          />
         </View>
 
         <View style={styles.info}>
-          <Text style={styles.name}>{program.name}</Text>
-          <Text style={styles.sessions}>
-            {program.sessionsCount} séance{program.sessionsCount > 1 ? 's' : ''}
+          <Text style={[styles.name, !isActive && styles.nameInactive]}>{program.name}</Text>
+          <Text style={styles.details}>
+            {sessionsCount} séance{sessionsCount > 1 ? 's' : ''} • {program.duration_weeks} sem.
           </Text>
-        </View>
-
-        <View style={styles.rightSection}>
-          <View style={styles.progressContainer}>
-            <Text style={styles.progressText}>{progress}%</Text>
-            <View style={styles.progressBarBackground}>
-              <View style={[styles.progressBarFill, { width: `${progress}%` }]} />
+          <View style={styles.badges}>
+            <View style={[styles.badge, styles.badgeLevel]}>
+              <Text style={styles.badgeText}>{program.difficulty_level}</Text>
             </View>
+            {isActive ? (
+              <View style={[styles.badge, styles.badgeActive]}>
+                <Text style={[styles.badgeText, styles.badgeTextActive]}>En cours</Text>
+              </View>
+            ) : (
+              <View style={[styles.badge, styles.badgeExpired]}>
+                <Text style={styles.badgeText}>Terminé</Text>
+              </View>
+            )}
           </View>
-
-          {onDelete && (
-            <TouchableOpacity
-              style={styles.deleteButton}
-              onPress={() => onDelete(program)}
-              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-              <Ionicons name="trash-outline" size={18} color={Colors.dark.textMuted} />
-            </TouchableOpacity>
-          )}
         </View>
+
+        {onDelete && (
+          <TouchableOpacity
+            style={styles.deleteButton}
+            onPress={(e) => {
+              e.stopPropagation();
+              onDelete(program);
+            }}
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+            <Ionicons name="trash-outline" size={18} color={Colors.dark.textMuted} />
+          </TouchableOpacity>
+        )}
       </View>
     </TouchableOpacity>
   );
@@ -68,6 +77,9 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: Colors.dark.border,
     marginBottom: 12,
+  },
+  containerInactive: {
+    opacity: 0.6,
   },
   content: {
     flexDirection: 'row',
@@ -83,6 +95,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginRight: 14,
   },
+  iconContainerInactive: {
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+  },
   info: {
     flex: 1,
   },
@@ -92,35 +107,42 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     marginBottom: 4,
   },
-  sessions: {
+  nameInactive: {
+    color: Colors.dark.textMuted,
+  },
+  details: {
     color: Colors.dark.textMuted,
     fontSize: 13,
+    marginBottom: 8,
   },
-  rightSection: {
+  badges: {
     flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
+    gap: 6,
   },
-  progressContainer: {
-    alignItems: 'flex-end',
+  badge: {
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 4,
+    borderWidth: 1,
   },
-  progressText: {
-    color: Colors.dark.primary,
-    fontSize: 14,
+  badgeLevel: {
+    borderColor: Colors.dark.border,
+  },
+  badgeActive: {
+    borderColor: Colors.dark.primary,
+    backgroundColor: 'rgba(220, 20, 60, 0.1)',
+  },
+  badgeExpired: {
+    borderColor: Colors.dark.border,
+  },
+  badgeText: {
+    color: Colors.dark.textMuted,
+    fontSize: 10,
     fontWeight: '600',
-    marginBottom: 4,
+    textTransform: 'uppercase',
   },
-  progressBarBackground: {
-    width: 60,
-    height: 4,
-    backgroundColor: Colors.dark.border,
-    borderRadius: 2,
-    overflow: 'hidden',
-  },
-  progressBarFill: {
-    height: '100%',
-    backgroundColor: Colors.dark.primary,
-    borderRadius: 2,
+  badgeTextActive: {
+    color: Colors.dark.primary,
   },
   deleteButton: {
     padding: 8,
