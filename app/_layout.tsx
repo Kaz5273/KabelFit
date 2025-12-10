@@ -1,3 +1,4 @@
+import { useDatabase } from '@/hooks/use-database';
 import { DarkTheme, ThemeProvider } from '@react-navigation/native';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
@@ -8,6 +9,12 @@ export const unstable_settings = {
 };
 
 export default function RootLayout() {
+  const { isLoading } = useDatabase();
+
+  if (isLoading) {
+    return null; // Ou un écran de chargement
+  }
+
   return (
     <ThemeProvider value={DarkTheme}>
       <Stack>

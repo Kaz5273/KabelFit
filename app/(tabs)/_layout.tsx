@@ -32,10 +32,22 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
+        name="sessions"
+        options={{
+          title: 'Sessions',
+          tabBarIcon: ({ color }) => <IconSymbol size={28} name="calendar" color={color} />,
+        }}
+      />
+      <Tabs.Screen
         name="badge-example"
         options={{
-          title: 'Explore',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
+          href: null, // Cache la page des exemples de la navigation
+        }}
+      />
+      <Tabs.Screen
+        name="modal-example"
+        options={{
+          href: null, // Cache la page des exemples de la navigation
         }}
       />
       
