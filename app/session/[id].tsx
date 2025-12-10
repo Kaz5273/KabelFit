@@ -67,8 +67,7 @@ export default function SessionDetailScreen() {
   );
 
   const handleStartSession = () => {
-    // TODO: Navigation vers la page d'exécution de la séance
-    Alert.alert('Lancer la séance', 'Fonctionnalité à venir');
+    router.push(`/session/${id}/workout` as any);
   };
 
   const handleEditSession = () => {
