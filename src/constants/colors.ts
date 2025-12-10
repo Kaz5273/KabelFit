@@ -1,3 +1,9 @@
+/**
+ * Palette de couleurs KabelFit
+ * Réexporte les couleurs du thème sombre pour utilisation dans les composants
+ * Pour le système complet light/dark, voir constants/theme.ts
+ */
+
 export const COLORS = {
   // Primary colors
   primary: '#DC143C', // Crimson red
@@ -30,3 +36,4 @@ export const COLORS = {
   black: '#000000',
   gray: '#808080',
 };
+
