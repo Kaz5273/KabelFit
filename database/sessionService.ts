@@ -1,37 +1,36 @@
 import { getDatabase } from './index';
 import type {
-    CreateSessionParams,
-    Exercise,
-    Session,
-    SessionExercise,
-    SessionWithExercises
+  CreateSessionParams,
+  Exercise,
+  Session,
+  SessionWithExercises
 } from './types';
 
 /**
- * Récupère toutes les séances
+ * Gets all sessions
  */
 export const getAllSessions = async (): Promise<Session[]> => {
   const db = await getDatabase();
   const sessions = await db.getAllAsync<Session>(
-    'SELECT * FROM sessions ORDER BY scheduled_date DESC, created_at DESC'
+    'SELECT * FROM sessions ORDER BY created_at DESC'
   );
   return sessions;
 };
 
 /**
- * Récupère les séances d'un programme spécifique
+ * Gets sessions by program
  */
 export const getSessionsByProgram = async (programId: number): Promise<Session[]> => {
   const db = await getDatabase();
   const sessions = await db.getAllAsync<Session>(
-    'SELECT * FROM sessions WHERE program_id = ? ORDER BY scheduled_date DESC',
+    'SELECT * FROM sessions WHERE program_id = ? ORDER BY "order" ASC',
     [programId]
   );
   return sessions;
 };
 
 /**
- * Récupère une séance par son ID
+ * Gets a session by ID
  */
 export const getSessionById = async (id: number): Promise<Session | null> => {
   const db = await getDatabase();
@@ -43,35 +42,18 @@ export const getSessionById = async (id: number): Promise<Session | null> => {
 };
 
 /**
- * Récupère une séance complète avec tous ses exercices
+ * Gets a session with all its exercises
  */
 export const getSessionWithExercises = async (id: number): Promise<SessionWithExercises | null> => {
   const db = await getDatabase();
-  
+
   const session = await getSessionById(id);
   if (!session) {
     return null;
   }
 
-  // Récupère les exercices de la séance avec leurs détails
-  const exercises = await db.getAllAsync<SessionExercise & Exercise>(
-    `SELECT 
-      se.id,
-      se.session_id,
-      se.exercise_id,
-      se.exercise_order,
-      se.sets,
-      se.reps,
-      se.rest_time,
-      e.name,
-      e.description,
-      e.category,
-      e.is_custom,
-      e.created_at
-    FROM session_exercises se
-    INNER JOIN exercises e ON se.exercise_id = e.id
-    WHERE se.session_id = ?
-    ORDER BY se.exercise_order`,
+  const exercises = await db.getAllAsync<Exercise>(
+    'SELECT * FROM exercises WHERE session_id = ? ORDER BY id ASC',
     [id]
   );
 
@@ -82,91 +64,60 @@ export const getSessionWithExercises = async (id: number): Promise<SessionWithEx
 };
 
 /**
- * Crée une nouvelle séance avec ses exercices
- * Utilise une transaction pour garantir la cohérence des données
+ * Creates a new session
  */
 export const createSession = async (params: CreateSessionParams): Promise<number> => {
   const db = await getDatabase();
-  
-  let sessionId: number = 0;
-
-  // Utilise une transaction pour insérer la séance et ses exercices
-  await db.withTransactionAsync(async () => {
-    const result = await db.runAsync(
-      `INSERT INTO sessions (program_id, name, type, duration, scheduled_date, recurrence_pattern) 
-       VALUES (?, ?, ?, ?, ?, ?)`,
-      [
-        params.program_id || null,
-        params.name,
-        params.type,
-        params.duration,
-        params.scheduled_date || null,
-        params.recurrence_pattern || null
-      ]
-    );
-
-    sessionId = result.lastInsertRowId;
-
-    // Insère tous les exercices de la séance
-    for (const exercise of params.exercises) {
-      await db.runAsync(
-        `INSERT INTO session_exercises (session_id, exercise_id, exercise_order, sets, reps, rest_time) 
-         VALUES (?, ?, ?, ?, ?, ?)`,
-        [
-          sessionId,
-          exercise.exercise_id,
-          exercise.order,
-          exercise.sets || null,
-          exercise.reps || null,
-          exercise.rest_time || null
-        ]
-      );
-    }
-  });
-
-  return sessionId;
+  const result = await db.runAsync(
+    `INSERT INTO sessions (program_id, name, day_of_week, duration_minutes, description, "order")
+     VALUES (?, ?, ?, ?, ?, ?)`,
+    [
+      params.program_id,
+      params.name,
+      params.day_of_week || null,
+      params.duration_minutes,
+      params.description || null,
+      params.order
+    ]
+  );
+  return result.lastInsertRowId;
 };
 
 /**
- * Met à jour une séance existante
+ * Updates a session
  */
 export const updateSession = async (
   id: number,
-  params: Partial<Omit<CreateSessionParams, 'exercises'>>
+  params: Partial<Omit<CreateSessionParams, 'program_id'>>
 ): Promise<void> => {
   const db = await getDatabase();
-  
+
   const updates: string[] = [];
   const values: any[] = [];
-
-  if (params.program_id !== undefined) {
-    updates.push('program_id = ?');
-    values.push(params.program_id);
-  }
 
   if (params.name !== undefined) {
     updates.push('name = ?');
     values.push(params.name);
   }
 
-  if (params.type !== undefined) {
-    updates.push('type = ?');
-    values.push(params.type);
+  if (params.day_of_week !== undefined) {
+    updates.push('day_of_week = ?');
+    values.push(params.day_of_week);
   }
 
-  if (params.duration !== undefined) {
-    updates.push('duration = ?');
-    values.push(params.duration);
+  if (params.duration_minutes !== undefined) {
+    updates.push('duration_minutes = ?');
+    values.push(params.duration_minutes);
   }
 
-  if (params.scheduled_date !== undefined) {
-    updates.push('scheduled_date = ?');
-    values.push(params.scheduled_date);
+  if (params.description !== undefined) {
+    updates.push('description = ?');
+    values.push(params.description);
   }
 
-  if (params.recurrence_pattern !== undefined) {
-    updates.push('recurrence_pattern = ?');
-    values.push(params.recurrence_pattern);
+  if (params.order !== undefined) {
+    updates.push('"order" = ?');
+    values.push(params.order);
   }
 
   if (updates.length > 0) {
@@ -179,7 +130,7 @@ export const updateSession = async (
 };
 
 /**
- * Supprime une séance et toutes ses données associées
+ * Deletes a session and all its associated data
  */
 export const deleteSession = async (id: number): Promise<void> => {
   const db = await getDatabase();
@@ -187,34 +138,37 @@ export const deleteSession = async (id: number): Promise<void> => {
 };
 
 /**
- * Récupère les séances planifiées pour une période donnée
+ * Gets sessions by day of the week
  */
-export const getSessionsByDateRange = async (
-  startDate: string,
-  endDate: string
-): Promise<Session[]> => {
+export const getSessionsByDay = async (day: string): Promise<Session[]> => {
   const db = await getDatabase();
   const sessions = await db.getAllAsync<Session>(
-    `SELECT * FROM sessions 
-     WHERE scheduled_date BETWEEN ? AND ? 
-     ORDER BY scheduled_date`,
-    [startDate, endDate]
+    'SELECT * FROM sessions WHERE day_of_week = ? ORDER BY created_at DESC',
+    [day]
   );
   return sessions;
 };
 
 /**
- * Récupère les prochaines séances planifiées
+ * Counts sessions in a program
  */
-export const getUpcomingSessions = async (limit: number = 10): Promise<Session[]> => {
+export const countSessionsByProgram = async (programId: number): Promise<number> => {
   const db = await getDatabase();
-  const now = new Date().toISOString();
+  const result = await db.getFirstAsync<{ count: number }>(
+    'SELECT COUNT(*) as count FROM sessions WHERE program_id = ?',
+    [programId]
+  );
+  return result?.count || 0;
+};
+
+/**
+ * Searches sessions by name
+ */
+export const searchSessions = async (query: string): Promise<Session[]> => {
+  const db = await getDatabase();
   const sessions = await db.getAllAsync<Session>(
-    `SELECT * FROM sessions 
-     WHERE scheduled_date >= ? 
-     ORDER BY scheduled_date 
-     LIMIT ?`,
-    [now, limit]
+    'SELECT * FROM sessions WHERE name LIKE ? ORDER BY created_at DESC',
+    [`%${query}%`]
   );
   return sessions;
 };

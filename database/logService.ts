@@ -1,16 +1,17 @@
 import { getDatabase } from './index';
 import type {
-    AddCommentParams,
-    Comment,
-    LogRepParams,
-    RepLog,
-    SessionLog,
-    SessionLogWithStats,
-    StartSessionLogParams
+  AddCommentParams,
+  Comment,
+  LogRepParams,
+  RepLog,
+  Session,
+  SessionLog,
+  SessionLogWithStats,
+  StartSessionLogParams
 } from './types';
 
 /**
- * Démarre un nouveau log de séance
+ * Starts a new session log
  */
 export const startSessionLog = async (params: StartSessionLogParams): Promise<number> => {
   const db = await getDatabase();
@@ -22,7 +23,7 @@ export const startSessionLog = async (params: StartSessionLogParams): Promise<nu
 };
 
 /**
- * Termine un log de séance
+ * Completes a session log
  */
 export const completeSessionLog = async (
   logId: number,
@@ -37,7 +38,7 @@ export const completeSessionLog = async (
 };
 
 /**
- * Abandonne un log de séance
+ * Abandons a session log
  */
 export const abandonSessionLog = async (logId: number, endTime: string): Promise<void> => {
   const db = await getDatabase();
@@ -48,7 +49,7 @@ export const abandonSessionLog = async (logId: number, endTime: string): Promise
 };
 
 /**
- * Récupère un log de séance par son ID
+ * Gets a session log by ID
  */
 export const getSessionLogById = async (id: number): Promise<SessionLog | null> => {
   const db = await getDatabase();
@@ -60,7 +61,7 @@ export const getSessionLogById = async (id: number): Promise<SessionLog | null> 
 };
 
 /**
- * Récupère tous les logs d'une séance spécifique
+ * Gets all logs for a specific session
  */
 export const getLogsBySession = async (sessionId: number): Promise<SessionLog[]> => {
   const db = await getDatabase();
@@ -72,58 +73,59 @@ export const getLogsBySession = async (sessionId: number): Promise<SessionLog[]>
 };
 
 /**
- * Récupère l'historique complet des séances avec statistiques
+ * Gets complete session history with statistics
  */
 export const getSessionLogsWithStats = async (limit: number = 50): Promise<SessionLogWithStats[]> => {
   const db = await getDatabase();
-  
-  const logs = await db.getAllAsync<any>(
-    `SELECT 
-      sl.*,
-      s.*,
-      COUNT(DISTINCT rl.exercise_id) as exercises_count,
-      SUM(rl.reps_completed) as total_reps,
-      COUNT(DISTINCT rl.set_number) as total_sets
-    FROM session_logs sl
-    INNER JOIN sessions s ON sl.session_id = s.id
-    LEFT JOIN rep_logs rl ON sl.id = rl.log_id
-    GROUP BY sl.id
-    ORDER BY sl.start_time DESC
-    LIMIT ?`,
+
+  const logs = await db.getAllAsync<SessionLog>(
+    `SELECT * FROM session_logs ORDER BY start_time DESC LIMIT ?`,
     [limit]
   );
 
-  return logs.map((log: any) => ({
-    id: log.id,
-    session_id: log.session_id,
-    start_time: log.start_time,
-    end_time: log.end_time,
-    status: log.status,
-    total_time: log.total_time,
-    created_at: log.created_at,
-    session: {
-      id: log.session_id,
-      program_id: log.program_id,
-      name: log.name,
-      type: log.type,
-      duration: log.duration,
-      scheduled_date: log.scheduled_date,
-      recurrence_pattern: log.recurrence_pattern,
-      created_at: log.created_at
-    },
-    total_reps: log.total_reps || 0,
-    total_sets: log.total_sets || 0,
-    exercises_count: log.exercises_count || 0
-  }));
+  const result: SessionLogWithStats[] = [];
+
+  for (const log of logs) {
+    const session = await db.getFirstAsync<Session>(
+      'SELECT * FROM sessions WHERE id = ?',
+      [log.session_id]
+    );
+
+    const stats = await db.getFirstAsync<{
+      exercises_count: number;
+      total_reps: number;
+      total_sets: number;
+    }>(
+      `SELECT
+        COUNT(DISTINCT exercise_id) as exercises_count,
+        SUM(reps_completed) as total_reps,
+        COUNT(*) as total_sets
+      FROM rep_logs
+      WHERE log_id = ?`,
+      [log.id]
+    );
+
+    if (session) {
+      result.push({
+        ...log,
+        session,
+        total_reps: stats?.total_reps || 0,
+        total_sets: stats?.total_sets || 0,
+        exercises_count: stats?.exercises_count || 0
+      });
+    }
+  }
+
+  return result;
 };
 
 /**
- * Enregistre des répétitions effectuées pendant une séance
+ * Logs reps performed during a session
  */
 export const logRep = async (params: LogRepParams): Promise<number> => {
   const db = await getDatabase();
   const result = await db.runAsync(
-    `INSERT INTO rep_logs (log_id, exercise_id, set_number, reps_completed, time_seconds) 
+    `INSERT INTO rep_logs (log_id, exercise_id, set_number, reps_completed, time_seconds)
      VALUES (?, ?, ?, ?, ?)`,
     [
       params.log_id,
@@ -137,7 +139,7 @@ export const logRep = async (params: LogRepParams): Promise<number> => {
 };
 
 /**
- * Récupère tous les logs de répétitions d'une séance
+ * Gets all rep logs for a session log
  */
 export const getRepLogsBySessionLog = async (logId: number): Promise<RepLog[]> => {
   const db = await getDatabase();
@@ -149,7 +151,7 @@ export const getRepLogsBySessionLog = async (logId: number): Promise<RepLog[]> =
 };
 
 /**
- * Récupère les répétitions par exercice pour un log de séance
+ * Gets rep logs by exercise for a session log
  */
 export const getRepLogsByExercise = async (
   logId: number,
@@ -164,7 +166,7 @@ export const getRepLogsByExercise = async (
 };
 
 /**
- * Ajoute un commentaire sur une séance ou un exercice
+ * Adds a comment to a session or exercise
  */
 export const addComment = async (params: AddCommentParams): Promise<number> => {
   const db = await getDatabase();
@@ -181,7 +183,7 @@ export const addComment = async (params: AddCommentParams): Promise<number> => {
 };
 
 /**
- * Récupère tous les commentaires d'une séance
+ * Gets all comments for a session log
  */
 export const getCommentsBySessionLog = async (logId: number): Promise<Comment[]> => {
   const db = await getDatabase();
@@ -193,7 +195,7 @@ export const getCommentsBySessionLog = async (logId: number): Promise<Comment[]>
 };
 
 /**
- * Récupère les commentaires d'un exercice spécifique
+ * Gets comments for a specific exercise
  */
 export const getCommentsByExercise = async (
   logId: number,
@@ -208,7 +210,7 @@ export const getCommentsByExercise = async (
 };
 
 /**
- * Supprime un commentaire
+ * Deletes a comment
  */
 export const deleteComment = async (id: number): Promise<void> => {
   const db = await getDatabase();
@@ -216,30 +218,7 @@ export const deleteComment = async (id: number): Promise<void> => {
 };
 
 /**
- * Calcule les statistiques d'un exercice sur toutes les séances
- */
-export const getExerciseStats = async (exerciseId: number) => {
-  const db = await getDatabase();
-  const stats = await db.getFirstAsync<{
-    total_sessions: number;
-    total_reps: number;
-    avg_reps: number;
-    max_reps: number;
-  }>(
-    `SELECT 
-      COUNT(DISTINCT log_id) as total_sessions,
-      SUM(reps_completed) as total_reps,
-      AVG(reps_completed) as avg_reps,
-      MAX(reps_completed) as max_reps
-    FROM rep_logs 
-    WHERE exercise_id = ?`,
-    [exerciseId]
-  );
-  return stats;
-};
-
-/**
- * Récupère les statistiques globales de l'utilisateur
+ * Gets global user statistics
  */
 export const getGlobalStats = async () => {
   const db = await getDatabase();
@@ -249,7 +228,7 @@ export const getGlobalStats = async () => {
     total_time: number;
     total_reps: number;
   }>(
-    `SELECT 
+    `SELECT
       COUNT(*) as total_sessions,
       SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) as completed_sessions,
       SUM(total_time) as total_time,
