@@ -1,25 +1,25 @@
-import React, { useState, useCallback } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
-  StatusBar,
-  Alert,
-  ActivityIndicator,
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
-import { Colors } from '@/constants/theme';
-import { router, useFocusEffect } from 'expo-router';
 import { ProgramCard } from '@/components/program';
+import { Colors } from '@/constants/theme';
 import {
-  getAllPrograms,
-  deleteProgram,
   countProgramSessions,
+  deleteProgram,
+  getAllPrograms,
   type Program,
 } from '@/database';
+import { Ionicons } from '@expo/vector-icons';
+import { router, useFocusEffect } from 'expo-router';
+import React, { useCallback, useState } from 'react';
+import {
+  ActivityIndicator,
+  Alert,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 interface ProgramWithMeta {
   program: Program;
@@ -85,15 +85,14 @@ export default function ProgramsScreen() {
   };
 
   const handleOpenProgram = (program: Program) => {
-    // Navigation vers le détail du programme
-    // router.push(`/program/${program.id}`);
-    console.log('Open program:', program.name);
+    // Navigation vers le détail du programme avec ses séances
+    router.push(`/program/${program.id}` as any);
   };
 
   const handleDeleteProgram = (program: Program) => {
     Alert.alert(
       'Supprimer le programme',
-      `Voulez-vous vraiment supprimer "${program.name}" ?`,
+      `Voulez-vous vraiment supprimer "${program.name}" et toutes ses séances ?`,
       [
         { text: 'Annuler', style: 'cancel' },
         {

@@ -1,8 +1,8 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '@/constants/theme';
 import type { Program } from '@/database';
+import { Ionicons } from '@expo/vector-icons';
+import React from 'react';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 interface ProgramCardProps {
   program: Program;
@@ -105,8 +105,27 @@ const styles = StyleSheet.create({
     color: Colors.dark.text,
     fontSize: 16,
     fontWeight: '600',
+    marginBottom: 6,
+  },
+<<<<<<< HEAD
+  detailsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
     marginBottom: 4,
   },
+  detail: {
+    color: Colors.dark.textMuted,
+    fontSize: 12,
+  },
+  separator: {
+    color: Colors.dark.textMuted,
+    fontSize: 12,
+  },
+  difficulty: {
+    fontSize: 12,
+    fontWeight: '600',
+=======
   nameInactive: {
     color: Colors.dark.textMuted,
   },
@@ -143,6 +162,7 @@ const styles = StyleSheet.create({
   },
   badgeTextActive: {
     color: Colors.dark.primary,
+>>>>>>> origin/master
   },
   deleteButton: {
     padding: 8,
