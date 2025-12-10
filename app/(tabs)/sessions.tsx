@@ -8,12 +8,12 @@ import type { Session } from '@/database/types';
 import { useRouter } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
 import {
-    RefreshControl,
-    SafeAreaView,
-    ScrollView,
-    StyleSheet,
-    TouchableOpacity,
-    View,
+  RefreshControl,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 
 type SessionWithProgram = Session & { programType?: string };
@@ -88,13 +88,13 @@ export default function SessionsScreen() {
   };
 
   const handleSessionPress = (session: Session) => {
-    // Pour l'instant, on affiche juste un message
-    console.log('Session sélectionnée:', session.name);
+    // Navigation vers le détail de la séance
+    router.push(`/session/${session.id}` as any);
   };
 
   const handleCreateSession = () => {
-    // Pour l'instant, on affiche juste un message
-    console.log('Créer une nouvelle session');
+    // Navigation vers la page de création de séance
+    router.push('/session/create' as any);
   };
 
   useEffect(() => {
