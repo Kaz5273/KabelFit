@@ -2,8 +2,8 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Colors } from '@/constants/theme';
 import {
-  completeSessionLog,
   abandonSessionLog,
+  completeSessionLog,
   getSessionWithExercises,
   logRep,
   startSessionLog,
@@ -19,8 +19,8 @@ import {
   ScrollView,
   StyleSheet,
   TouchableOpacity,
-  View,
   Vibration,
+  View,
 } from 'react-native';
 
 interface ExerciseProgress {
@@ -46,8 +46,8 @@ export default function WorkoutScreen() {
   const [isResting, setIsResting] = useState(false);
   const [restTime, setRestTime] = useState(0);
   const [elapsedTime, setElapsedTime] = useState(0);
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
-  const elapsedTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const elapsedTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const startTimeRef = useRef<string>('');
 
   const currentExercise = session?.exercises[currentExerciseIndex];
@@ -129,11 +129,13 @@ export default function WorkoutScreen() {
           setSession(sessionData);
 
           // Initialize progress tracking
-          const initialProgress: ExerciseProgress[] = sessionData.exercises.map((ex) => ({
-            exerciseId: ex.id,
-            setsCompleted: 0,
-            repsPerSet: [],
-          }));
+          const initialProgress: ExerciseProgress[] = sessionData.exercises.map(
+            (ex: { id: number }) => ({
+              exerciseId: ex.id,
+              setsCompleted: 0,
+              repsPerSet: [],
+            })
+          );
           setExerciseProgress(initialProgress);
 
           // Start session log
@@ -317,7 +319,10 @@ export default function WorkoutScreen() {
 
   const getProgressPercentage = () => {
     if (!session) return 0;
-    const totalSetsAll = session.exercises.reduce((sum, ex) => sum + (ex.sets || 3), 0);
+    const totalSetsAll = session.exercises.reduce(
+      (sum: number, ex: { sets?: number | null }) => sum + (ex.sets || 3),
+      0
+    );
     const completedSets = exerciseProgress.reduce((sum, p) => sum + p.setsCompleted, 0);
     return Math.round((completedSets / totalSetsAll) * 100);
   };

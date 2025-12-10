@@ -139,7 +139,7 @@ const styles = StyleSheet.create({
     color: Colors.dark.textMuted,
     fontSize: 10,
     fontWeight: '600',
-    textTransform: 'uppercase',
+    textTransform: 'uppercase' as const,
   },
   badgeTextActive: {
     color: Colors.dark.primary,
