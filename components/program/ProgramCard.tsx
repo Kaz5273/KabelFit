@@ -1,67 +1,66 @@
 import { Colors } from '@/constants/theme';
-import type { Program } from '@/database/types';
+import type { Program } from '@/database';
 import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 interface ProgramCardProps {
   program: Program;
+  sessionsCount: number;
+  isActive: boolean;
   onPress: (program: Program) => void;
   onDelete?: (program: Program) => void;
 }
 
-export const ProgramCard: React.FC<ProgramCardProps> = ({ program, onPress, onDelete }) => {
-  // Pour l'instant, on affiche juste le type et la durée
-  // Le pourcentage de complétion sera calculé plus tard avec les sessions terminées
-  
-  const getDifficultyColor = (level: string) => {
-    switch (level) {
-      case 'beginner': return '#4CAF50';
-      case 'intermediate': return '#FF9800';
-      case 'advanced': return '#F44336';
-      default: return Colors.dark.textMuted;
-    }
-  };
-
-  const getDifficultyLabel = (level: string) => {
-    switch (level) {
-      case 'beginner': return 'Débutant';
-      case 'intermediate': return 'Intermédiaire';
-      case 'advanced': return 'Avancé';
-      default: return level;
-    }
-  };
-
+export const ProgramCard: React.FC<ProgramCardProps> = ({
+  program,
+  sessionsCount,
+  isActive,
+  onPress,
+  onDelete,
+}) => {
   return (
     <TouchableOpacity
-      style={styles.container}
+      style={[styles.container, !isActive && styles.containerInactive]}
       activeOpacity={0.7}
       onPress={() => onPress(program)}>
       <View style={styles.content}>
-        <View style={styles.iconContainer}>
-          <Ionicons name="barbell" size={24} color={Colors.dark.primary} />
+        <View style={[styles.iconContainer, !isActive && styles.iconContainerInactive]}>
+          <Ionicons
+            name="barbell"
+            size={24}
+            color={isActive ? Colors.dark.primary : Colors.dark.textMuted}
+          />
         </View>
 
         <View style={styles.info}>
-          <Text style={styles.name}>{program.name}</Text>
-          <View style={styles.detailsRow}>
-            <Text style={styles.detail}>{program.type}</Text>
-            <Text style={styles.separator}>•</Text>
-            <Text style={styles.detail}>{program.duration_weeks} semaines</Text>
-            <Text style={styles.separator}>•</Text>
-            <Text style={styles.detail}>{program.sessions_per_week}x/sem</Text>
+          <Text style={[styles.name, !isActive && styles.nameInactive]}>{program.name}</Text>
+          <Text style={styles.details}>
+            {sessionsCount} séance{sessionsCount > 1 ? 's' : ''} • {program.duration_weeks} sem.
+          </Text>
+          <View style={styles.badges}>
+            <View style={[styles.badge, styles.badgeLevel]}>
+              <Text style={styles.badgeText}>{program.difficulty_level}</Text>
+            </View>
+            {isActive ? (
+              <View style={[styles.badge, styles.badgeActive]}>
+                <Text style={[styles.badgeText, styles.badgeTextActive]}>En cours</Text>
+              </View>
+            ) : (
+              <View style={[styles.badge, styles.badgeExpired]}>
+                <Text style={styles.badgeText}>Terminé</Text>
+              </View>
+            )}
           </View>
-          {program.difficulty_level && (
-            <Text style={[styles.difficulty, { color: getDifficultyColor(program.difficulty_level) }]}>
-              {getDifficultyLabel(program.difficulty_level)}
-            </Text>
-          )}
         </View>
 
         {onDelete && (
           <TouchableOpacity
             style={styles.deleteButton}
-            onPress={() => onDelete(program)}
+            onPress={(e) => {
+              e.stopPropagation();
+              onDelete(program);
+            }}
             hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
             <Ionicons name="trash-outline" size={18} color={Colors.dark.textMuted} />
           </TouchableOpacity>
@@ -79,6 +78,9 @@ const styles = StyleSheet.create({
     borderColor: Colors.dark.border,
     marginBottom: 12,
   },
+  containerInactive: {
+    opacity: 0.6,
+  },
   content: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -93,6 +95,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginRight: 14,
   },
+  iconContainerInactive: {
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+  },
   info: {
     flex: 1,
   },
@@ -102,6 +107,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     marginBottom: 6,
   },
+<<<<<<< HEAD
   detailsRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -119,6 +125,44 @@ const styles = StyleSheet.create({
   difficulty: {
     fontSize: 12,
     fontWeight: '600',
+=======
+  nameInactive: {
+    color: Colors.dark.textMuted,
+  },
+  details: {
+    color: Colors.dark.textMuted,
+    fontSize: 13,
+    marginBottom: 8,
+  },
+  badges: {
+    flexDirection: 'row',
+    gap: 6,
+  },
+  badge: {
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 4,
+    borderWidth: 1,
+  },
+  badgeLevel: {
+    borderColor: Colors.dark.border,
+  },
+  badgeActive: {
+    borderColor: Colors.dark.primary,
+    backgroundColor: 'rgba(220, 20, 60, 0.1)',
+  },
+  badgeExpired: {
+    borderColor: Colors.dark.border,
+  },
+  badgeText: {
+    color: Colors.dark.textMuted,
+    fontSize: 10,
+    fontWeight: '600',
+    textTransform: 'uppercase',
+  },
+  badgeTextActive: {
+    color: Colors.dark.primary,
+>>>>>>> origin/master
   },
   deleteButton: {
     padding: 8,

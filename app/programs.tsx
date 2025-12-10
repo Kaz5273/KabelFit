@@ -1,12 +1,16 @@
 import { ProgramCard } from '@/components/program';
 import { Colors } from '@/constants/theme';
-import { deleteProgram, getAllPrograms } from '@/database';
-import type { Program } from '@/database/types';
+import {
+  countProgramSessions,
+  deleteProgram,
+  getAllPrograms,
+  type Program,
+} from '@/database';
 import { Ionicons } from '@expo/vector-icons';
-import { useFocusEffect } from '@react-navigation/native';
-import { router } from 'expo-router';
+import { router, useFocusEffect } from 'expo-router';
 import React, { useCallback, useState } from 'react';
 import {
+  ActivityIndicator,
   Alert,
   ScrollView,
   StatusBar,
@@ -17,27 +21,59 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-export default function ProgramsScreen() {
-  const [programs, setPrograms] = useState<Program[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+interface ProgramWithMeta {
+  program: Program;
+  sessionsCount: number;
+  isActive: boolean;
+}
 
-  const loadPrograms = useCallback(async () => {
+// Vérifie si un programme est encore actif (dans sa durée)
+const isProgramActive = (program: Program): boolean => {
+  const createdAt = new Date(program.created_at);
+  const endDate = new Date(createdAt);
+  endDate.setDate(endDate.getDate() + program.duration_weeks * 7);
+  return new Date() <= endDate;
+};
+
+export default function ProgramsScreen() {
+  const [programs, setPrograms] = useState<ProgramWithMeta[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const loadPrograms = async () => {
     try {
-      setIsLoading(true);
+      setLoading(true);
       const allPrograms = await getAllPrograms();
-      setPrograms(allPrograms);
+
+      // Charger le nombre de séances pour chaque programme
+      const programsWithMeta: ProgramWithMeta[] = await Promise.all(
+        allPrograms.map(async (program) => {
+          const sessionsCount = await countProgramSessions(program.id);
+          const isActive = isProgramActive(program);
+          return { program, sessionsCount, isActive };
+        })
+      );
+
+      // Trier: actifs d'abord, puis par date de création
+      programsWithMeta.sort((a, b) => {
+        if (a.isActive && !b.isActive) return -1;
+        if (!a.isActive && b.isActive) return 1;
+        return new Date(b.program.created_at).getTime() - new Date(a.program.created_at).getTime();
+      });
+
+      setPrograms(programsWithMeta);
     } catch (error) {
       console.error('Erreur lors du chargement des programmes:', error);
       Alert.alert('Erreur', 'Impossible de charger les programmes');
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
-  }, []);
+  };
 
+  // Recharger les programmes à chaque fois que la page est affichée
   useFocusEffect(
     useCallback(() => {
       loadPrograms();
-    }, [loadPrograms])
+    }, [])
   );
 
   const handleBack = () => {
@@ -45,9 +81,7 @@ export default function ProgramsScreen() {
   };
 
   const handleAddProgram = () => {
-    // Navigation vers la création de programme
-    // router.push('/create-program');
-    console.log('Navigate to create program');
+    router.push('/create-program');
   };
 
   const handleOpenProgram = (program: Program) => {
@@ -66,9 +100,8 @@ export default function ProgramsScreen() {
           style: 'destructive',
           onPress: async () => {
             try {
-              await deleteProgram(program.id!);
-              await loadPrograms();
-              Alert.alert('Succès', 'Programme supprimé');
+              await deleteProgram(program.id);
+              setPrograms((prev) => prev.filter((p) => p.program.id !== program.id));
             } catch (error) {
               console.error('Erreur lors de la suppression:', error);
               Alert.alert('Erreur', 'Impossible de supprimer le programme');
@@ -78,6 +111,9 @@ export default function ProgramsScreen() {
       ]
     );
   };
+
+  const activePrograms = programs.filter((p) => p.isActive);
+  const expiredPrograms = programs.filter((p) => !p.isActive);
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
@@ -94,38 +130,81 @@ export default function ProgramsScreen() {
         </TouchableOpacity>
       </View>
 
-      <ScrollView
-        style={styles.scrollView}
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}>
-        {programs.length === 0 ? (
-          <View style={styles.emptyState}>
-            <Ionicons name="fitness-outline" size={64} color={Colors.dark.textMuted} />
-            <Text style={styles.emptyTitle}>Aucun programme</Text>
-            <Text style={styles.emptySubtitle}>
-              Créez votre premier programme d'entraînement
-            </Text>
-            <TouchableOpacity style={styles.emptyButton} onPress={handleAddProgram}>
-              <Ionicons name="add" size={20} color={Colors.dark.background} />
-              <Text style={styles.emptyButtonText}>Créer un programme</Text>
-            </TouchableOpacity>
-          </View>
-        ) : (
-          <>
-            <Text style={styles.sectionLabel}>
-              {programs.length} programme{programs.length > 1 ? 's' : ''}
-            </Text>
-            {programs.map((program) => (
-              <ProgramCard
-                key={program.id}
-                program={program}
-                onPress={handleOpenProgram}
-                onDelete={handleDeleteProgram}
-              />
-            ))}
-          </>
-        )}
-      </ScrollView>
+      {loading ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={Colors.dark.primary} />
+        </View>
+      ) : (
+        <ScrollView
+          style={styles.scrollView}
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}>
+          {programs.length === 0 ? (
+            <View style={styles.emptyState}>
+              <Ionicons name="fitness-outline" size={64} color={Colors.dark.textMuted} />
+              <Text style={styles.emptyTitle}>Aucun programme</Text>
+              <Text style={styles.emptySubtitle}>
+                Créez votre premier programme d'entraînement
+              </Text>
+              <TouchableOpacity style={styles.emptyButton} onPress={handleAddProgram}>
+                <Ionicons name="add" size={20} color={Colors.dark.background} />
+                <Text style={styles.emptyButtonText}>Créer un programme</Text>
+              </TouchableOpacity>
+            </View>
+          ) : (
+            <>
+              {/* Programmes actifs */}
+              {activePrograms.length > 0 && (
+                <>
+                  <Text style={styles.sectionLabel}>
+                    {activePrograms.length} programme{activePrograms.length > 1 ? 's' : ''} en cours
+                  </Text>
+                  {activePrograms.map((item) => (
+                    <ProgramCard
+                      key={item.program.id}
+                      program={item.program}
+                      sessionsCount={item.sessionsCount}
+                      isActive={item.isActive}
+                      onPress={handleOpenProgram}
+                      onDelete={handleDeleteProgram}
+                    />
+                  ))}
+                </>
+              )}
+
+              {/* Message si aucun programme actif */}
+              {activePrograms.length === 0 && (
+                <View style={styles.noActiveContainer}>
+                  <Ionicons name="calendar-outline" size={32} color={Colors.dark.textMuted} />
+                  <Text style={styles.noActiveText}>Aucun programme en cours</Text>
+                  <TouchableOpacity style={styles.noActiveButton} onPress={handleAddProgram}>
+                    <Text style={styles.noActiveButtonText}>Créer un programme</Text>
+                  </TouchableOpacity>
+                </View>
+              )}
+
+              {/* Programmes terminés */}
+              {expiredPrograms.length > 0 && (
+                <>
+                  <Text style={[styles.sectionLabel, styles.sectionLabelExpired]}>
+                    Programmes terminés
+                  </Text>
+                  {expiredPrograms.map((item) => (
+                    <ProgramCard
+                      key={item.program.id}
+                      program={item.program}
+                      sessionsCount={item.sessionsCount}
+                      isActive={item.isActive}
+                      onPress={handleOpenProgram}
+                      onDelete={handleDeleteProgram}
+                    />
+                  ))}
+                </>
+              )}
+            </>
+          )}
+        </ScrollView>
+      )}
 
       {/* Floating Add Button */}
       {programs.length > 0 && (
@@ -164,6 +243,11 @@ const styles = StyleSheet.create({
   addButton: {
     padding: 8,
   },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   scrollView: {
     flex: 1,
   },
@@ -172,12 +256,16 @@ const styles = StyleSheet.create({
     paddingBottom: 100,
   },
   sectionLabel: {
-    color: Colors.dark.textMuted,
+    color: Colors.dark.text,
     fontSize: 13,
-    fontWeight: '500',
+    fontWeight: '600',
     marginBottom: 16,
     textTransform: 'uppercase',
     letterSpacing: 1,
+  },
+  sectionLabelExpired: {
+    color: Colors.dark.textMuted,
+    marginTop: 24,
   },
   emptyState: {
     flex: 1,
@@ -210,6 +298,33 @@ const styles = StyleSheet.create({
   emptyButtonText: {
     color: Colors.dark.background,
     fontSize: 14,
+    fontWeight: '600',
+  },
+  noActiveContainer: {
+    alignItems: 'center',
+    paddingVertical: 32,
+    marginBottom: 16,
+    backgroundColor: Colors.dark.backgroundCard,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: Colors.dark.border,
+  },
+  noActiveText: {
+    color: Colors.dark.textMuted,
+    fontSize: 14,
+    marginTop: 12,
+    marginBottom: 16,
+  },
+  noActiveButton: {
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: Colors.dark.primary,
+  },
+  noActiveButtonText: {
+    color: Colors.dark.primary,
+    fontSize: 13,
     fontWeight: '600',
   },
   fab: {
