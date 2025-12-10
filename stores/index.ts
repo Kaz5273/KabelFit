@@ -2,4 +2,5 @@
 export { useExerciseStore } from './useExerciseStore';
 export { useSessionStore } from './useSessionStore';
 export { useUserStore } from './useUserStore';
+export { useWorkoutHistoryStore } from './useWorkoutHistoryStore';
 

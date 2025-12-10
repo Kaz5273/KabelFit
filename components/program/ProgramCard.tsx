@@ -107,25 +107,6 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     marginBottom: 6,
   },
-<<<<<<< HEAD
-  detailsRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    marginBottom: 4,
-  },
-  detail: {
-    color: Colors.dark.textMuted,
-    fontSize: 12,
-  },
-  separator: {
-    color: Colors.dark.textMuted,
-    fontSize: 12,
-  },
-  difficulty: {
-    fontSize: 12,
-    fontWeight: '600',
-=======
   nameInactive: {
     color: Colors.dark.textMuted,
   },
@@ -158,11 +139,10 @@ const styles = StyleSheet.create({
     color: Colors.dark.textMuted,
     fontSize: 10,
     fontWeight: '600',
-    textTransform: 'uppercase',
+    textTransform: 'uppercase' as const,
   },
   badgeTextActive: {
     color: Colors.dark.primary,
->>>>>>> origin/master
   },
   deleteButton: {
     padding: 8,
