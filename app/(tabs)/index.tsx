@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '@/constants/theme';
 import { LinearGradient } from 'expo-linear-gradient';
+import { router } from 'expo-router';
 
 const menuItems = [
   {
@@ -38,9 +39,7 @@ const menuItems = [
 
 export default function HomeScreen() {
   const handleMenuPress = (route: string) => {
-    // Navigation à implémenter
-    // router.push(route);
-    console.log('Navigate to:', route);
+    router.push(route as any);
   };
 
   return (
