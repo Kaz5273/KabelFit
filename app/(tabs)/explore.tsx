@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { StyleSheet, Alert, TouchableOpacity } from 'react-native';
 import { Pedometer } from 'expo-sensors';
 import { Image } from 'expo-image';
@@ -12,8 +12,8 @@ export default function StepCounterScreen() {
   // États pour gérer les données du compteur
   const [isPedometerAvailable, setIsPedometerAvailable] = useState('checking');
   const [currentSteps, setCurrentSteps] = useState(0);
-  const [todaySteps, setTodaySteps] = useState(0);
-  const [stepOffset, setStepOffset] = useState(0); // Offset pour la réinitialisation
+  const [stepBaseline, setStepBaseline] = useState(0); // Point de départ au lancement de l'app
+  const baselineRef = useRef(0); // Référence pour la baseline, accessible partout
 
   // Vérifier si le podomètre est disponible sur l'appareil
   useEffect(() => {
@@ -34,13 +34,13 @@ export default function StepCounterScreen() {
 
   // S'abonner aux mises à jour du compteur de pas en temps réel
   useEffect(() => {
-    let subscription: any;
+    let intervalId: ReturnType<typeof setInterval>;
 
     const subscribe = async () => {
       const isAvailable = await Pedometer.isAvailableAsync();
 
       if (isAvailable) {
-        // Obtenir les pas depuis minuit (début de la journée)
+        // Enregistrer le total actuel comme baseline (point de départ)
         const start = new Date();
         start.setHours(0, 0, 0, 0); // Minuit aujourd'hui
         const end = new Date();
@@ -48,34 +48,42 @@ export default function StepCounterScreen() {
         try {
           const pastStepCountResult = await Pedometer.getStepCountAsync(start, end);
           if (pastStepCountResult) {
-            setTodaySteps(pastStepCountResult.steps);
-            setCurrentSteps(pastStepCountResult.steps - stepOffset);
+            baselineRef.current = pastStepCountResult.steps;
+            setStepBaseline(pastStepCountResult.steps);
           }
         } catch (error) {
-          console.log('Erreur lors de la récupération des pas:', error);
+          console.log('Erreur lors de la récupération de la baseline:', error);
         }
 
-        // S'abonner aux changements en temps réel
-        subscription = Pedometer.watchStepCount((result) => {
-          // result.steps contient le nombre de pas depuis le dernier événement
-          setCurrentSteps((prev) => prev + result.steps);
-          setTodaySteps((prev) => prev + result.steps);
-        });
+        // Mettre à jour les pas toutes les secondes
+        intervalId = setInterval(async () => {
+          try {
+            const now = new Date(); // Nouvelle date à chaque itération
+            const currentStepCount = await Pedometer.getStepCountAsync(start, now);
+            if (currentStepCount) {
+              // Calculer les pas depuis la baseline
+              const stepsSinceBaseline = currentStepCount.steps - baselineRef.current;
+              setCurrentSteps(stepsSinceBaseline);
+            }
+          } catch (error) {
+            console.log('Erreur lors de la mise à jour des pas:', error);
+          }
+        }, 1000); // Mise à jour toutes les 1 seconde
       }
     };
 
     subscribe();
 
-    // Nettoyer l'abonnement quand le composant est démonté
+    // Nettoyer l'intervalle quand le composant est démonté
     return () => {
-      if (subscription) {
-        subscription.remove();
+      if (intervalId) {
+        clearInterval(intervalId);
       }
     };
-  }, [stepOffset]);
+  }, []);
 
   // Fonction pour réinitialiser le compteur
-  const handleReset = () => {
+  const handleReset = async () => {
     Alert.alert(
       'Réinitialiser le compteur',
       'Voulez-vous vraiment remettre le compteur à zéro ?',
@@ -86,9 +94,24 @@ export default function StepCounterScreen() {
         },
         {
           text: 'Réinitialiser',
-          onPress: () => {
-            setStepOffset(todaySteps); // Sauvegarder l'offset
-            setCurrentSteps(0); // Remettre à zéro l'affichage
+          onPress: async () => {
+            // Récupérer le total actuel et en faire la nouvelle baseline
+            const start = new Date();
+            start.setHours(0, 0, 0, 0);
+            const end = new Date();
+
+            try {
+              const currentTotal = await Pedometer.getStepCountAsync(start, end);
+              if (currentTotal) {
+                baselineRef.current = currentTotal.steps;
+                setStepBaseline(currentTotal.steps);
+                setCurrentSteps(0);
+              }
+            } catch (error) {
+              console.log('Erreur lors de la réinitialisation:', error);
+              // Réinitialiser quand même si erreur
+              setCurrentSteps(0);
+            }
           },
           style: 'destructive',
         },
@@ -166,7 +189,9 @@ export default function StepCounterScreen() {
 
             <ThemedView style={styles.statBox}>
               <IconSymbol name="calendar" size={32} color="#10b981" />
-              <ThemedText style={styles.statValue}>{todaySteps.toLocaleString()}</ThemedText>
+              <ThemedText style={styles.statValue}>
+                {(stepBaseline + currentSteps).toLocaleString()}
+              </ThemedText>
               <ThemedText style={styles.statLabel}>Aujourd'hui</ThemedText>
             </ThemedView>
           </ThemedView>
