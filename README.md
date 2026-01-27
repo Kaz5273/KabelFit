@@ -188,17 +188,18 @@ L'application utilise **SQLite** en local (pas d'API REST). Les données sont st
 
 ### Tables principales
 
-| Table | Description |
-|-------|-------------|
-| `users` | Profils utilisateurs (nom, email, objectifs, niveau) |
-| `programs` | Programmes d'entraînement (type, durée, difficulté) |
-| `sessions` | Séances liées à un programme (jour, durée, ordre) |
-| `exercises` | Exercices d'une séance (séries, reps, repos) |
-| `workout_logs` | Historique des entraînements effectués |
+| Table          | Description                                          |
+| -------------- | ---------------------------------------------------- |
+| `users`        | Profils utilisateurs (nom, email, objectifs, niveau) |
+| `programs`     | Programmes d'entraînement (type, durée, difficulté)  |
+| `sessions`     | Séances liées à un programme (jour, durée, ordre)    |
+| `exercises`    | Exercices d'une séance (séries, reps, repos)         |
+| `workout_logs` | Historique des entraînements effectués               |
 
 ### Services CRUD
 
 Chaque entité a son service dans `database/` :
+
 - `programService.ts` - CRUD programmes
 - `sessionService.ts` - CRUD séances
 - `exerciseService.ts` - CRUD exercices
