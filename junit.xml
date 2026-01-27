@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="jest tests" tests="77" failures="0" errors="0" time="1.643">
+  <testsuite name="useExerciseStore" errors="0" failures="0" skipped="0" timestamp="2026-01-27T10:19:08" time="0.623" tests="9">
+    <testcase classname="useExerciseStore Initial State should have correct initial state" name="useExerciseStore Initial State should have correct initial state" time="0.013">
+    </testcase>
+    <testcase classname="useExerciseStore setExercises should set exercises array" name="useExerciseStore setExercises should set exercises array" time="0.001">
+    </testcase>
+    <testcase classname="useExerciseStore addExercise should add an exercise to the list" name="useExerciseStore addExercise should add an exercise to the list" time="0.001">
+    </testcase>
+    <testcase classname="useExerciseStore updateExercise should update an existing exercise" name="useExerciseStore updateExercise should update an existing exercise" time="0.002">
+    </testcase>
+    <testcase classname="useExerciseStore updateExercise should also update currentExercise if it matches" name="useExerciseStore updateExercise should also update currentExercise if it matches" time="0.001">
+    </testcase>
+    <testcase classname="useExerciseStore removeExercise should remove an exercise from the list" name="useExerciseStore removeExercise should remove an exercise from the list" time="0.001">
+    </testcase>
+    <testcase classname="useExerciseStore removeExercise should clear currentExercise if removed" name="useExerciseStore removeExercise should clear currentExercise if removed" time="0">
+    </testcase>
+    <testcase classname="useExerciseStore Filters should set and merge filters" name="useExerciseStore Filters should set and merge filters" time="0">
+    </testcase>
+    <testcase classname="useExerciseStore Filters should clear filters" name="useExerciseStore Filters should clear filters" time="0.001">
+    </testcase>
+  </testsuite>
+  <testsuite name="useSessionStore" errors="0" failures="0" skipped="0" timestamp="2026-01-27T10:19:08" time="0.64" tests="16">
+    <testcase classname="useSessionStore Initial State should have correct initial state" name="useSessionStore Initial State should have correct initial state" time="0.011">
+    </testcase>
+    <testcase classname="useSessionStore setSessions should set sessions array" name="useSessionStore setSessions should set sessions array" time="0.001">
+    </testcase>
+    <testcase classname="useSessionStore setSessions should clear error when setting sessions" name="useSessionStore setSessions should clear error when setting sessions" time="0.001">
+    </testcase>
+    <testcase classname="useSessionStore addSession should add a session to the list" name="useSessionStore addSession should add a session to the list" time="0.001">
+    </testcase>
+    <testcase classname="useSessionStore addSession should append session to existing sessions" name="useSessionStore addSession should append session to existing sessions" time="0.001">
+    </testcase>
+    <testcase classname="useSessionStore updateSession should update an existing session" name="useSessionStore updateSession should update an existing session" time="0">
+    </testcase>
+    <testcase classname="useSessionStore updateSession should update currentSession if it matches the updated session" name="useSessionStore updateSession should update currentSession if it matches the updated session" time="0.001">
+    </testcase>
+    <testcase classname="useSessionStore updateSession should not update currentSession if ids do not match" name="useSessionStore updateSession should not update currentSession if ids do not match" time="0">
+    </testcase>
+    <testcase classname="useSessionStore removeSession should remove a session from the list" name="useSessionStore removeSession should remove a session from the list" time="0">
+    </testcase>
+    <testcase classname="useSessionStore removeSession should clear currentSession if it was removed" name="useSessionStore removeSession should clear currentSession if it was removed" time="0">
+    </testcase>
+    <testcase classname="useSessionStore Filters should set filters" name="useSessionStore Filters should set filters" time="0">
+    </testcase>
+    <testcase classname="useSessionStore Filters should merge filters with existing ones" name="useSessionStore Filters should merge filters with existing ones" time="0.001">
+    </testcase>
+    <testcase classname="useSessionStore Filters should clear all filters" name="useSessionStore Filters should clear all filters" time="0">
+    </testcase>
+    <testcase classname="useSessionStore Loading and Error States should set loading state" name="useSessionStore Loading and Error States should set loading state" time="0">
+    </testcase>
+    <testcase classname="useSessionStore Loading and Error States should set error message" name="useSessionStore Loading and Error States should set error message" time="0">
+    </testcase>
+    <testcase classname="useSessionStore reset should reset store to initial state" name="useSessionStore reset should reset store to initial state" time="0.001">
+    </testcase>
+  </testsuite>
+  <testsuite name="Validation Schemas" errors="0" failures="0" skipped="0" timestamp="2026-01-27T10:19:08" time="0.681" tests="17">
+    <testcase classname="Validation Schemas exerciseSchema should validate a valid exercise" name="Validation Schemas exerciseSchema should validate a valid exercise" time="0.006">
+    </testcase>
+    <testcase classname="Validation Schemas exerciseSchema should require name field" name="Validation Schemas exerciseSchema should require name field" time="0.011">
+    </testcase>
+    <testcase classname="Validation Schemas exerciseSchema should enforce minimum name length of 2 characters" name="Validation Schemas exerciseSchema should enforce minimum name length of 2 characters" time="0.001">
+    </testcase>
+    <testcase classname="Validation Schemas exerciseSchema should enforce maximum name length of 100 characters" name="Validation Schemas exerciseSchema should enforce maximum name length of 100 characters" time="0.001">
+    </testcase>
+    <testcase classname="Validation Schemas exerciseSchema should require sets to be positive" name="Validation Schemas exerciseSchema should require sets to be positive" time="0.001">
+    </testcase>
+    <testcase classname="Validation Schemas exerciseSchema should require reps to be a positive integer" name="Validation Schemas exerciseSchema should require reps to be a positive integer" time="0.002">
+    </testcase>
+    <testcase classname="Validation Schemas exerciseSchema should enforce maximum reps of 500" name="Validation Schemas exerciseSchema should enforce maximum reps of 500" time="0.001">
+    </testcase>
+    <testcase classname="Validation Schemas exerciseSchema should allow exercise with only required fields" name="Validation Schemas exerciseSchema should allow exercise with only required fields" time="0.002">
+    </testcase>
+    <testcase classname="Validation Schemas sessionSchema should validate a valid session" name="Validation Schemas sessionSchema should validate a valid session" time="0.001">
+    </testcase>
+    <testcase classname="Validation Schemas sessionSchema should require name field" name="Validation Schemas sessionSchema should require name field" time="0.003">
+    </testcase>
+    <testcase classname="Validation Schemas sessionSchema should require duration_minutes field" name="Validation Schemas sessionSchema should require duration_minutes field" time="0.002">
+    </testcase>
+    <testcase classname="Validation Schemas sessionSchema should require order field" name="Validation Schemas sessionSchema should require order field" time="0.002">
+    </testcase>
+    <testcase classname="Validation Schemas sessionSchema should validate day_of_week values" name="Validation Schemas sessionSchema should validate day_of_week values" time="0.003">
+    </testcase>
+    <testcase classname="Validation Schemas sessionSchema should accept valid day_of_week values" name="Validation Schemas sessionSchema should accept valid day_of_week values" time="0.001">
+    </testcase>
+    <testcase classname="Validation Schemas sessionSchema should enforce minimum duration of 1 minute" name="Validation Schemas sessionSchema should enforce minimum duration of 1 minute" time="0.001">
+    </testcase>
+    <testcase classname="Validation Schemas sessionSchema should enforce maximum duration of 300 minutes" name="Validation Schemas sessionSchema should enforce maximum duration of 300 minutes" time="0.001">
+    </testcase>
+    <testcase classname="Validation Schemas sessionSchema should enforce maximum description length" name="Validation Schemas sessionSchema should enforce maximum description length" time="0.001">
+    </testcase>
+  </testsuite>
+  <testsuite name="Badge Component" errors="0" failures="0" skipped="0" timestamp="2026-01-27T10:19:08" time="1.015" tests="9">
+    <testcase classname="Badge Component Rendering should render badge with label" name="Badge Component Rendering should render badge with label" time="0.084">
+    </testcase>
+    <testcase classname="Badge Component Rendering should render with default variant" name="Badge Component Rendering should render with default variant" time="0.002">
+    </testcase>
+    <testcase classname="Badge Component Variants should render primary variant" name="Badge Component Variants should render primary variant" time="0.001">
+    </testcase>
+    <testcase classname="Badge Component Variants should render success variant" name="Badge Component Variants should render success variant" time="0">
+    </testcase>
+    <testcase classname="Badge Component Variants should render warning variant" name="Badge Component Variants should render warning variant" time="0.001">
+    </testcase>
+    <testcase classname="Badge Component Variants should render neutral variant" name="Badge Component Variants should render neutral variant" time="0.001">
+    </testcase>
+    <testcase classname="Badge Component Accessibility should be accessible" name="Badge Component Accessibility should be accessible" time="0.002">
+    </testcase>
+    <testcase classname="Badge Component Edge Cases should render with empty label" name="Badge Component Edge Cases should render with empty label" time="0.001">
+    </testcase>
+    <testcase classname="Badge Component Edge Cases should render with long label" name="Badge Component Edge Cases should render with long label" time="0.001">
+    </testcase>
+  </testsuite>
+  <testsuite name="Button Component" errors="0" failures="0" skipped="0" timestamp="2026-01-27T10:19:08" time="1.147" tests="11">
+    <testcase classname="Button Component Rendering should render button with title" name="Button Component Rendering should render button with title" time="0.199">
+    </testcase>
+    <testcase classname="Button Component Rendering should render primary variant by default" name="Button Component Rendering should render primary variant by default" time="0.003">
+    </testcase>
+    <testcase classname="Button Component Rendering should render secondary variant" name="Button Component Rendering should render secondary variant" time="0.003">
+    </testcase>
+    <testcase classname="Button Component Rendering should render outline variant" name="Button Component Rendering should render outline variant" time="0.001">
+    </testcase>
+    <testcase classname="Button Component Sizes should render small size" name="Button Component Sizes should render small size" time="0.002">
+    </testcase>
+    <testcase classname="Button Component Sizes should render medium size by default" name="Button Component Sizes should render medium size by default" time="0.002">
+    </testcase>
+    <testcase classname="Button Component Sizes should render large size" name="Button Component Sizes should render large size" time="0.002">
+    </testcase>
+    <testcase classname="Button Component Interactions should call onPress when pressed" name="Button Component Interactions should call onPress when pressed" time="0.002">
+    </testcase>
+    <testcase classname="Button Component Interactions should not call onPress when disabled" name="Button Component Interactions should not call onPress when disabled" time="0.003">
+    </testcase>
+    <testcase classname="Button Component Loading State should show loading indicator when loading" name="Button Component Loading State should show loading indicator when loading" time="0.019">
+    </testcase>
+    <testcase classname="Button Component Loading State should not be pressable when loading" name="Button Component Loading State should not be pressable when loading" time="0.001">
+    </testcase>
+  </testsuite>
+  <testsuite name="SessionCard Component" errors="0" failures="0" skipped="0" timestamp="2026-01-27T10:19:08" time="1.144" tests="15">
+    <testcase classname="SessionCard Component Rendering should render session name" name="SessionCard Component Rendering should render session name" time="0.209">
+    </testcase>
+    <testcase classname="SessionCard Component Rendering should render duration" name="SessionCard Component Rendering should render duration" time="0.003">
+    </testcase>
+    <testcase classname="SessionCard Component Rendering should render day of week in French" name="SessionCard Component Rendering should render day of week in French" time="0.003">
+    </testcase>
+    <testcase classname="SessionCard Component Rendering should render COMMENCER button text" name="SessionCard Component Rendering should render COMMENCER button text" time="0.001">
+    </testcase>
+    <testcase classname="SessionCard Component Program Type Badge should render program type badge when provided" name="SessionCard Component Program Type Badge should render program type badge when provided" time="0.003">
+    </testcase>
+    <testcase classname="SessionCard Component Program Type Badge should not render badge when programType is not provided" name="SessionCard Component Program Type Badge should not render badge when programType is not provided" time="0.002">
+    </testcase>
+    <testcase classname="SessionCard Component Day of Week Formatting should display &quot;Jour non défini&quot; when day_of_week is null" name="SessionCard Component Day of Week Formatting should display &quot;Jour non défini&quot; when day_of_week is null" time="0.002">
+    </testcase>
+    <testcase classname="SessionCard Component Day of Week Formatting should translate Monday to Lundi" name="SessionCard Component Day of Week Formatting should translate Monday to Lundi" time="0.002">
+    </testcase>
+    <testcase classname="SessionCard Component Day of Week Formatting should translate Tuesday to Mardi" name="SessionCard Component Day of Week Formatting should translate Tuesday to Mardi" time="0.005">
+    </testcase>
+    <testcase classname="SessionCard Component Day of Week Formatting should translate Wednesday to Mercredi" name="SessionCard Component Day of Week Formatting should translate Wednesday to Mercredi" time="0.002">
+    </testcase>
+    <testcase classname="SessionCard Component Day of Week Formatting should translate Thursday to Jeudi" name="SessionCard Component Day of Week Formatting should translate Thursday to Jeudi" time="0.001">
+    </testcase>
+    <testcase classname="SessionCard Component Day of Week Formatting should translate Friday to Vendredi" name="SessionCard Component Day of Week Formatting should translate Friday to Vendredi" time="0.001">
+    </testcase>
+    <testcase classname="SessionCard Component Day of Week Formatting should translate Saturday to Samedi" name="SessionCard Component Day of Week Formatting should translate Saturday to Samedi" time="0.003">
+    </testcase>
+    <testcase classname="SessionCard Component Day of Week Formatting should translate Sunday to Dimanche" name="SessionCard Component Day of Week Formatting should translate Sunday to Dimanche" time="0.001">
+    </testcase>
+    <testcase classname="SessionCard Component Interactions should call onPress with session when pressed" name="SessionCard Component Interactions should call onPress with session when pressed" time="0.004">
+    </testcase>
+  </testsuite>
+</testsuites>

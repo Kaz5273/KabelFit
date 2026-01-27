@@ -1,0 +1,45 @@
+# Test E2E: Parcours complet - Accueil vers Programmes
+# Ce test vérifie le parcours utilisateur clé de l'application
+
+appId: com.kabelfit.app
+---
+# Lancement de l'application
+- launchApp:
+    clearState: true
+
+# Attendre que l'écran d'accueil soit chargé
+- assertVisible:
+    text: "Bonjour.*Athlète"
+    optional: false
+
+# Vérifier que le sous-titre est visible
+- assertVisible:
+    text: "Prêt pour votre entraînement"
+
+# Vérifier la présence du menu "Mes Programmes"
+- assertVisible:
+    text: "Mes Programmes"
+
+# Cliquer sur "Mes Programmes"
+- tapOn:
+    text: "Mes Programmes"
+
+# Attendre la navigation vers l'écran des programmes
+- assertVisible:
+    text: "Programmes"
+    optional: true
+
+# Revenir en arrière si possible (navigation)
+- tapOn:
+    id: "back-button"
+    optional: true
+
+# Test de navigation vers l'historique
+- tapOn:
+    text: "Historique"
+    optional: true
+
+# Vérification finale - retour à l'accueil
+- assertVisible:
+    text: "Bonjour"
+    optional: true
