@@ -42,30 +42,58 @@ export const sessionSchema = Yup.object().shape({
     .required('Le nom est requis')
     .min(2, 'Le nom doit contenir au moins 2 caractères')
     .max(100, 'Le nom ne peut pas dépasser 100 caractères'),
-  
+
   day_of_week: Yup.string()
     .notRequired()
     .oneOf(
       ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday', undefined],
       'Jour de la semaine invalide'
     ),
-  
+
   duration_minutes: Yup.number()
     .required('La durée est requise')
     .positive('La durée doit être positive')
     .integer('La durée doit être un entier')
     .min(1, 'Minimum 1 minute')
     .max(300, 'Maximum 300 minutes (5 heures)'),
-  
+
   order: Yup.number()
     .required('L\'ordre est requis')
     .positive('L\'ordre doit être positif')
     .integer('L\'ordre doit être un entier')
     .min(1, 'L\'ordre minimum est 1'),
-  
+
   description: Yup.string()
     .notRequired()
     .max(1000, 'La description ne peut pas dépasser 1000 caractères'),
+});
+
+/**
+ * Schéma de validation pour un programme
+ */
+export const programSchema = Yup.object().shape({
+  name: Yup.string()
+    .required('Le nom est requis')
+    .min(2, 'Le nom doit contenir au moins 2 caractères')
+    .max(100, 'Le nom ne peut pas dépasser 100 caractères'),
+
+  type: Yup.string()
+    .required('Le type est requis')
+    .oneOf(
+      ['Strength', 'Cardio', 'Flexibility', 'Mixed', 'Endurance'],
+      'Type de programme invalide'
+    ),
+
+  description: Yup.string()
+    .notRequired()
+    .max(1000, 'La description ne peut pas dépasser 1000 caractères'),
+
+  duration_weeks: Yup.number()
+    .notRequired()
+    .positive('La durée doit être positive')
+    .integer('La durée doit être un entier')
+    .min(1, 'Minimum 1 semaine')
+    .max(52, 'Maximum 52 semaines'),
 });
 
 /**
@@ -86,4 +114,11 @@ export interface SessionFormValues {
   duration_minutes: number;
   order: number;
   description?: string;
+}
+
+export interface ProgramFormValues {
+  name: string;
+  type: string;
+  description?: string;
+  duration_weeks?: number;
 }
