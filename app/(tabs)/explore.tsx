@@ -58,7 +58,8 @@ export default function StepCounterScreen() {
         // Mettre à jour les pas toutes les secondes
         intervalId = setInterval(async () => {
           try {
-            const currentStepCount = await Pedometer.getStepCountAsync(start, end);
+            const now = new Date(); // Nouvelle date à chaque itération
+            const currentStepCount = await Pedometer.getStepCountAsync(start, now);
             if (currentStepCount) {
               // Calculer les pas depuis la baseline
               const stepsSinceBaseline = currentStepCount.steps - baselineRef.current;
