@@ -1,0 +1,19 @@
+# Configuration Maestro pour KabelFit
+# Documentation: https://maestro.mobile.dev/
+
+appId: com.kabelfit.app
+name: KabelFit E2E Tests
+
+# Configuration de base
+flows:
+  - flows/*.yaml
+
+# Variables d'environnement
+env:
+  APP_ID: com.kabelfit.app
+  TIMEOUT: 30000
+
+# Configuration des tests
+config:
+  retries: 2
+  timeout: 60000
